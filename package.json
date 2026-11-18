@@ -1,0 +1,50 @@
+{
+  "name": "opencode-anyrouter-auth",
+  "version": "0.1.0",
+  "description": "AnyRouter account login, session-based daily sign-in and native multi-account routing for Magpie, with conservative multi-protocol request protection.",
+  "type": "module",
+  "main": "./index.mjs",
+  "exports": {
+    ".": "./index.mjs",
+    "./server": "./index.mjs",
+    "./generic": "./generic.mjs"
+  },
+  "scripts": {
+    "test": "node --test --test-concurrency=1 test/*.test.mjs",
+    "test:host": "node --test test/host.integration.test.mjs",
+    "test:gateway": "node --test test/gateway.integration.test.mjs"
+  },
+  "files": [
+    "DESIGN.md",
+    "LICENSE",
+    "README.md",
+    "UPSTREAM.md",
+    "generic.mjs",
+    "icon.png",
+    "index.mjs",
+    "lib/"
+  ],
+  "keywords": [
+    "opencode",
+    "opencode-plugin",
+    "magpie",
+    "anyrouter",
+    "checkin",
+    "sign-in",
+    "responses",
+    "anthropic",
+    "gemini"
+  ],
+  "license": "MIT",
+  "magpie": {
+    "icon": "data:image/png;base64,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",
+    "maxConcurrency": 4
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/roiding/opencode-anyrouter-auth.git"
+  },
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org"
+  }
+}
