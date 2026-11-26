@@ -163,9 +163,19 @@ midnight reset window.
 
 ## Models and request boundaries
 
-No model is enabled by default. The catalog starts from the account's discovered
-models. Public registry and pricing metadata may fill capabilities only for
-models already available to that account.
+No model is enabled by default. Official AnyRouter endpoints discover models
+through `https://anyrouter.top/api/pricing`, using `model_name` as the model ID,
+without probing `/v1/models`. Discovery uses the account's site session or system
+access token plus `New-Api-User` when available; API-key-only accounts read
+anonymously. Inference keys are never sent to the pricing endpoint, and choosing
+the alternate inference endpoint does not move site discovery there.
+
+Pricing supplies catalog entries and their metadata, not a guarantee of API-key
+permissions; actual inference still enforces those permissions. Public registry
+metadata only enriches discovered or explicitly configured models. A pricing
+failure preserves explicitly configured models with the host fallback marker,
+without declaring the inference key expired. Custom non-official gateways retain
+their `/models` discovery, with pricing used only for metadata enrichment.
 
 Protocol defaults:
 

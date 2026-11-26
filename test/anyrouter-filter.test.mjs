@@ -100,16 +100,17 @@ test("combined loader keeps account/header/session auth and filters only the mod
   assert.doesNotMatch(JSON.stringify(logs), /sk-private-test-key|private-site-password|private-site-token|private-session|private-message|private-reasoning/);
 });
 
-test("model discovery still uses upstream catalog and never applies response-history retry", async () => {
+test("model discovery uses authenticated site pricing without inference headers or response-history retry", async () => {
   const calls = [];
   await mockedFetch(async (url, init) => {
     calls.push({ url, init });
-    if (url.endsWith("/api/pricing")) return json({ success: true, data: [
-      { model_name: "account-model-a", limit: { input: 115000, output: 8000 }, tool_call: false,
+    assert.equal(url, "https://anyrouter.top/api/pricing");
+    return json({ success: true, data: [
+      { model_name: "account-model-a", context_length: 123456, supported_endpoint_types: ["openai"],
+        limit: { input: 115000, output: 8000 }, tool_call: false,
         reasoning_options: [{ type: "effort", values: ["low", "high"] }] },
-      { model_name: "public-only", limit: { context: 999999 } }
+      { model_name: "account-model-b", supported_endpoint_types: ["anthropic"] }
     ] });
-    return json({ data: [{ id: "account-model-a", context_length: 123456, supported_endpoint_types: ["openai"] }, { id: "account-model-b", supported_endpoint_types: ["anthropic"] }] });
   }, async () => {
     const hooks = await entry.server({}, { modelsRegistryPath: fileURLToPath(new URL("./fixtures/models.json", import.meta.url)) });
     const models = await hooks.provider.models({ models: {} }, { auth });
@@ -119,12 +120,13 @@ test("model discovery still uses upstream catalog and never applies response-his
     assert.deepEqual(Object.keys(models["account-model-a"].variants), ["low", "high"]);
     assert.equal(models["account-model-a"].capabilities.toolcall, false);
   });
-  assert.equal(calls.length, 2);
-  assert.equal(calls[0].url, "https://a-ocnfniawgw.cn-shanghai.fcapp.run/v1/models");
-  assert.equal(calls[0].init.headers.get("authorization"), `Bearer ${auth.key}`);
-  assert.equal(calls[1].url, "https://anyrouter.top/api/pricing");
-  for (const name of ["authorization", "cookie"]) assert.equal(calls[1].init.headers.get(name), null);
-  assert.equal(calls[1].init.headers.get("new-api-user"), "-1");
+  assert.equal(calls.length, 1);
+  assert.equal(calls[0].init.headers.get("authorization"), auth.metadata.accessToken);
+  assert.equal(calls[0].init.headers.get("cookie"), auth.metadata.cookie);
+  assert.equal(calls[0].init.headers.get("new-api-user"), "123");
+  assert.equal(calls[0].init.headers.get("referer"), "https://anyrouter.top/pricing");
+  assert.equal(calls[0].init.headers.get("originator"), null);
+  assert.doesNotMatch(calls[0].init.headers.get("user-agent"), /codex/);
 });
 
 test("opted-in check-in uses a separate sign_in call and never filters or retries", async t => {

@@ -33,7 +33,7 @@ test("installed Magpie gateway: native names, aliases and account failover witho
     for await (const chunk of req) chunks.push(chunk);
     const body = Buffer.concat(chunks).toString();
     const send = (data, status = 200) => { res.writeHead(status, { "content-type": "application/json" }); res.end(JSON.stringify(data)); };
-    if (req.url === "/v1/models") return send({ data: [{ id: "native-route-test", supported_endpoint_types: ["responses"],
+    if (req.url === "/api/pricing") return send({ success: true, data: [{ model_name: "native-route-test", supported_endpoint_types: ["responses"],
       limit: { context: 10000, input: 9000, output: 1000 }, reasoning: true,
       reasoning_options: [{ type: "effort", values: ["low", "high", "xhigh"] }] }] });
     if (req.url === "/api/user/self") {

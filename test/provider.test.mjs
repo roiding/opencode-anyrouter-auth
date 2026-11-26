@@ -551,19 +551,14 @@ test("generated AnyRouter provider defaults do not flatten mixed model protocols
   assert.equal(out["gpt-6-astra"].api.url, "https://anyrouter.top/v1");
 });
 
-test("selected API endpoint controls discovery and inference while site calls stay on anyrouter.top", async () => {
+test("selected API endpoint controls inference while pricing discovery stays on anyrouter.top", async () => {
   const calls = [];
   const hooks = await createProvider({}, {}, {
     loadRegistry: async () => ({}),
     fetchImpl: async (url, init) => {
       calls.push({ url: String(url), init });
       const path = new URL(url).pathname;
-      if (path === "/v1/models") {
-        return new Response(JSON.stringify({
-          data: [{ id: "claude-opus-5-5" }, { id: "gemini-2.5-pro" }]
-        }), { headers: { "content-type": "application/json" } });
-      }
-      if (path === "/api/pricing") return json([]);
+      if (path === "/api/pricing") return json([{ model_name: "claude-opus-5-5" }, { model_name: "gemini-2.5-pro" }]);
       return new Response(JSON.stringify({ ok: true }), { headers: { "content-type": "application/json" } });
     }
   });
@@ -585,8 +580,11 @@ test("selected API endpoint controls discovery and inference while site calls st
     id: "anyrouter",
     models: {}
   }, { auth });
-  assert.equal(calls[0].url, "https://a-ocnfniawgw.cn-shanghai.fcapp.run/v1/models");
-  assert.equal(calls[1].url, "https://anyrouter.top/api/pricing");
+  assert.equal(calls.length, 1);
+  assert.equal(calls[0].url, "https://anyrouter.top/api/pricing");
+  assert.equal(calls[0].init.headers.get("cookie"), state().session);
+  assert.equal(calls[0].init.headers.get("new-api-user"), "123");
+  assert.equal(calls[0].init.headers.get("authorization"), null);
   assert.equal(models["claude-opus-5-5"].api.url, "https://a-ocnfniawgw.cn-shanghai.fcapp.run/v1");
   assert.equal(models["gemini-2.5-pro"].api.url, "https://a-ocnfniawgw.cn-shanghai.fcapp.run/v1beta");
   const loaded = await hooks.auth.loader(async () => auth, {});

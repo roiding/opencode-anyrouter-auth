@@ -50,11 +50,11 @@ test("installed Magpie host: keyless login, isolated accounts, real wallet metad
       if (!session || req.headers["new-api-user"] !== session) return send({ success: false }, 401);
       return send({ success: true, data: { items: [{ id: Number(session), status: 1, key: `model-${session}`, unlimited_quota: true }], total: 1 } });
     }
-    if (req.url === "/v1/models") return send({ data: [
-      { id: "fixture-responses", supported_endpoint_types: ["responses"], context_length: 10000 },
-      { id: "fixture-messages", supported_endpoint_types: ["anthropic"], context_length: 10000 },
-      { id: "fixture-gemini", supported_endpoint_types: ["gemini"], context_length: 10000 },
-      { id: "gpt-fixture-exact", supported_endpoint_types: ["responses"] }
+    if (req.url === "/api/pricing") return send({ success: true, data: [
+      { model_name: "fixture-responses", supported_endpoint_types: ["responses"], context_length: 10000 },
+      { model_name: "fixture-messages", supported_endpoint_types: ["anthropic"], context_length: 10000 },
+      { model_name: "fixture-gemini", supported_endpoint_types: ["gemini"], context_length: 10000 },
+      { model_name: "gpt-fixture-exact", supported_endpoint_types: ["responses"] }
     ] });
     if (req.url === "/v1/responses") {
       const key = req.headers.authorization;

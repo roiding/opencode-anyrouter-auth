@@ -1,6 +1,6 @@
 {
   "name": "opencode-anyrouter-auth",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "AnyRouter account login, session-based daily sign-in and native multi-account routing for Magpie, with conservative multi-protocol request protection.",
   "type": "module",
   "main": "./index.mjs",

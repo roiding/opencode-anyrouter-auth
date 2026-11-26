@@ -165,6 +165,7 @@ test("metadata enrichment neither expands account availability nor changes model
 
 test("discovery failure still resolves explicit effort overrides without granting registry-only access", async () => {
   const catalog = createCatalog({ explicit: () => ({ models: { manual: { reasoning_options: [{ type: "effort", values: ["high"] }] } } }),
+    site: { request: async () => { throw new Error("offline"); } },
     compatibility: () => false, fetchImpl: async () => { throw new Error("offline"); },
     loadRegistry: () => { assert.fail("failed discovery does not need registry availability"); } });
   const result = await catalog({ models: { manual: { capabilities: { reasoning: false } }, "registry-only": profile() } },
